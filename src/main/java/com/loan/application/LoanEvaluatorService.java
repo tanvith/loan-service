@@ -14,11 +14,13 @@ import com.loan.domain.valueobject.Money;
 import com.loan.infrastructure.persistence.LoanDecisionEntity;
 import com.loan.infrastructure.persistence.LoanDecisionMapper;
 import com.loan.infrastructure.persistence.LoanDecisionRepository;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class LoanEvaluatorService {
 
     private final LoanApplicationValidator validator = new LoanApplicationValidator();
@@ -39,16 +41,7 @@ public class LoanEvaluatorService {
         List<String> validationErrors = validator.validate(application);
 
         if (!validationErrors.isEmpty()) {
-            LoanDecision decision = new LoanDecision(
-                    application.getId(),
-                    "REJECTED",
-                    null,
-                    null,
-                    validationErrors
-            );
-
-            save(decision);
-            return decision;
+            throw new com.loan.application.validation.ValidationException(validationErrors);
         }
 
         List<String> failures = eligibilityEngine.evaluate(application);
