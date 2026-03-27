@@ -17,4 +17,4 @@ public class LoanApplication {
     public UUID getId() { return id; }
     public Applicant getApplicant() { return applicant; }
     public Loan getLoan() { return loan; }
-}git add .
+}
