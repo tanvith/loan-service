@@ -11,12 +11,15 @@ import java.util.UUID;
 @RequestMapping("/applications")
 public class LoanController {
 
-    private final LoanEvaluatorService service = new LoanEvaluatorService();
+    private final LoanEvaluatorService service;
+
+    public LoanController(LoanEvaluatorService service) {
+        this.service = service;
+    }
 
     @PostMapping
     public LoanDecision create(@RequestBody LoanApplicationRequest request) {
 
-        // Convert request → domain
         Applicant applicant = new Applicant(
                 request.applicant.name,
                 request.applicant.age,
@@ -37,7 +40,6 @@ public class LoanController {
                 loan
         );
 
-        // Evaluate
         return service.evaluate(application);
     }
 }
