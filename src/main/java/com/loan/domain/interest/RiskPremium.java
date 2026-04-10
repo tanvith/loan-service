@@ -1,23 +1,27 @@
 package com.loan.domain.interest;
 
 import com.loan.domain.model.LoanApplication;
-import com.loan.domain.risk.RiskBand;
-import com.loan.domain.risk.RiskBandClassifier;
+import com.loan.domain.risk.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class RiskPremium implements InterestComponent {
 
-    private final RiskBandClassifier classifier = new RiskBandClassifier();
 
     @Override
     public BigDecimal apply(LoanApplication application) {
 
-        RiskBand band = classifier.classify(
-                application.getApplicant().getCreditScore()
+        List<LoanRiskStrategy> strategies = List.of(
+                new HomeLoanRiskStrategy(),
+                new CarLoanRiskStrategy(),
+                new PersonalLoanRiskStrategy()
         );
 
-        return switch (band) {
+        RiskBandClassifier classifier = new RiskBandClassifier(strategies);
+        RiskBand riskBand = classifier.classify(application);
+
+        return switch (riskBand) {
             case LOW -> BigDecimal.ZERO;
             case MEDIUM -> BigDecimal.valueOf(1.5);
             case HIGH -> BigDecimal.valueOf(3);

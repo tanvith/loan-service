@@ -16,6 +16,11 @@ public class EligibilityEngine {
         rules.add(new EmiToIncomeRule());
     }
 
+    public void setEligibilityRule(EligibilityRule eligibilityRule){
+        rules.add(eligibilityRule);
+    }
+
+
     public List<String> evaluate(LoanApplication application) {
 
         List<String> failures = new ArrayList<>();

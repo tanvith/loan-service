@@ -4,11 +4,10 @@ import com.loan.application.validation.LoanApplicationValidator;
 import com.loan.domain.calculator.EmiCalculator;
 import com.loan.domain.interest.InterestRateCalculator;
 import com.loan.domain.model.LoanApplication;
+import com.loan.domain.risk.*;
 import com.loan.domain.rules.EmiThresholdOfferRule;
 import com.loan.domain.rules.OfferRule;
 import com.loan.domain.rules.EligibilityEngine;
-import com.loan.domain.risk.RiskBand;
-import com.loan.domain.risk.RiskBandClassifier;
 import com.loan.domain.valueobject.InterestRate;
 import com.loan.domain.valueobject.Money;
 import com.loan.infrastructure.persistence.LoanDecisionEntity;
@@ -27,7 +26,6 @@ public class LoanEvaluatorService {
     private final EligibilityEngine eligibilityEngine = new EligibilityEngine();
     private final InterestRateCalculator interestCalculator = new InterestRateCalculator();
     private final EmiCalculator emiCalculator = new EmiCalculator();
-    private final RiskBandClassifier riskClassifier = new RiskBandClassifier();
     private final OfferRule offerRule = new EmiThresholdOfferRule();
 
     private final LoanDecisionRepository repository;
@@ -59,9 +57,15 @@ public class LoanEvaluatorService {
             return decision;
         }
 
-        RiskBand riskBand = riskClassifier.classify(
-                application.getApplicant().getCreditScore()
+
+        List<LoanRiskStrategy> strategies = List.of(
+                new HomeLoanRiskStrategy(),
+                new CarLoanRiskStrategy(),
+                new PersonalLoanRiskStrategy()
         );
+
+        RiskBandClassifier classifier = new RiskBandClassifier(strategies);
+        RiskBand riskBand = classifier.classify(application);
 
         BigDecimal rate = interestCalculator.calculate(application);
 
